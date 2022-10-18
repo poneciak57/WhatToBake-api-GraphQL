@@ -1,0 +1,17 @@
+type Message {
+    content:String
+}
+
+# LoginResponse
+# token - is used to authenticate user need to be provided in AuthHeader
+type AuthResponse {
+    token:String
+}
+
+# Login Request
+# username - user login
+# password - user password
+input AuthRequest {
+    username:String
+    password:String
+}

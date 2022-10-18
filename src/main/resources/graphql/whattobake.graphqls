@@ -1,0 +1,38 @@
+# Recipe object
+type Recipe{
+    id:ID
+    title:String
+    link:String
+    products:[Product]
+}
+
+# Product object
+type Product{
+    id:ID
+    name:String
+}
+
+# Filters for recipes
+# page - number of requested page, starts from 0
+# products - list of product IDs
+# productOrder -
+# orderDirection -
+input FilterInput{
+    page:Int
+    products: [Int]
+    productOrder: productOrder
+    orderDirection: orderDirection
+}
+
+# Product Order enum
+# MOST - you want to order by recipes with the most number of matching products
+# LEAST - you want to order by recipes with the least number of matching products
+enum productOrder{
+    MOST
+    LEAST
+}
+
+enum orderDirection{
+    ASC
+    DESC
+}
