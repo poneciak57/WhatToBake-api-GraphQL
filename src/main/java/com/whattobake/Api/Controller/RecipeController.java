@@ -24,9 +24,9 @@ public class RecipeController {
         return recipeService.allRecipes(filters);
     }
 
-    @SchemaMapping(typeName = "Recipe",field = "products")
-    public Flux<Product> product(Recipe recipe){
-        return productRepository.findByRecipe(recipe.getId());
-    }
+//    @SchemaMapping(typeName = "Recipe",field = "products")
+//    public Flux<Product> product(Recipe recipe){
+//        return productRepository.findByRecipe(recipe.getId());
+//    }
 
 }

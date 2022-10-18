@@ -1,7 +1,11 @@
 package com.whattobake.Api.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whattobake.Api.DTO.Bind;
 import com.whattobake.Api.DTO.Filters;
+import com.whattobake.Api.DTO.ProductsFromDb;
 import com.whattobake.Api.DTO.RecipeFull;
 import com.whattobake.Api.Enum.OrderDirection;
 import com.whattobake.Api.Enum.ProductOrder;
@@ -13,6 +17,7 @@ import com.whattobake.Api.Repository.RecipeRepository;
 import io.r2dbc.spi.ConnectionFactory;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -40,21 +45,25 @@ public class RecipeService {
     @Value("${whattobake.recipes.pageCount}")
     private int pageCount;
 
+    @SneakyThrows
     public Flux<Recipe> allRecipes(Filters filters){
-        String query = "SELECT r.* FROM whattobake.recipe r ";
+        String query = "" +
+                "SELECT r.*, CONCAT('[', GROUP_CONCAT(CONCAT('{\"id\":',p.id,',\"name\":\"',p.name,'\"}') SEPARATOR ','),']') AS products FROM whattobake.recipe r JOIN whattobake.product p ON (SELECT COUNT(1) FROM whattobake.recipe_product rp WHERE p.id = rp.product_id AND rp.recipe_id = r.id) ";
         List<Bind> args = new ArrayList<>();
+        String order = "";
 
         //preparing query
         if(filters.getProducts() != null){
-            query += " LEFT JOIN(SELECT recipe_id AS 'recipe',COUNT(*) AS 'owned' FROM recipe_product WHERE product_id "+(filters.getProductOrder()== ProductOrder.LEAST?"NOT":"")+" IN(:products) GROUP BY recipe_id) X ON X.recipe = r.id ORDER BY IFNULL(owned,0) ";
-            query += filters.getOrderDirection() != null ? filters.getOrderDirection().getValue() : OrderDirection.ASC.getValue();
+            query += " LEFT JOIN(SELECT recipe_id AS 'recipe',COUNT(*) AS 'owned' FROM recipe_product WHERE product_id "+(filters.getProductOrder()== ProductOrder.LEAST?"NOT":"")+" IN(:products) GROUP BY recipe_id) X ON X.recipe = r.id ";
+            order += " ORDER BY IFNULL(owned,0) " + (filters.getOrderDirection() != null ? filters.getOrderDirection().getValue() : OrderDirection.ASC.getValue());
             args.add(new Bind("products",filters.getProducts()));
         }
+        query += " GROUP BY r.id ";
+        query += order;
         if (filters.getPage() != null) {
             query += " LIMIT "+pageCount+" OFFSET :page ";
             args.add(new Bind("page",pageCount*filters.getPage()));
         }
-        //Not done yet
 
         GenericExecuteSpec genericExecuteSpec = databaseClient.sql(query);
 
@@ -63,12 +72,22 @@ public class RecipeService {
             genericExecuteSpec = genericExecuteSpec.bind(b.getName(),b.getData());
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
         return genericExecuteSpec.map((row,rowMeta)->
-                Recipe.builder()
-                        .id(row.get("id",Long.class))
-                        .title(row.get("title",String.class))
-                        .link(row.get("link",String.class))
-                        .build()
+                {
+                    try {
+                        return Recipe.builder()
+                                .id(row.get("id",Long.class))
+                                .title(row.get("title",String.class))
+                                .link(row.get("link",String.class))
+                                .products(objectMapper.readValue(
+                                        row.get("products",String.class),
+                                        objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class)))
+                                .build();
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
         ).all();
     }
 
@@ -93,16 +112,14 @@ public class RecipeService {
                         .link(recipe.getLink())
                         .title(recipe.getTitle())
                 .build()).doOnNext(r ->
-                    recipe.getProducts().forEach(product -> {
-                        productRepository.findByName(product)
-                            .switchIfEmpty(productRepository.save(Product.builder().name(product).build()))
-                            .subscribe(p->
-                                    databaseClient.inConnectionMany(connection -> Flux.from(
-                                            connection.createStatement("INSERT INTO `whattobake`.`recipe_product` (`recipe_id`,`product_id`) VALUES (?rid,?pid)")
-                                            .bind("rid",r.getId()).bind("pid",p.getId()).add()
-                                            .execute())).subscribe()
-                            );
-                })
+                    recipe.getProducts().forEach(product -> productRepository.findByName(product)
+                        .switchIfEmpty(productRepository.save(Product.builder().name(product).build()))
+                        .subscribe(p->
+                                databaseClient.inConnectionMany(connection -> Flux.from(
+                                        connection.createStatement("INSERT INTO `whattobake`.`recipe_product` (`recipe_id`,`product_id`) VALUES (?rid,?pid)")
+                                        .bind("rid",r.getId()).bind("pid",p.getId()).add()
+                                        .execute())).subscribe()
+                        ))
         );
     }
 }

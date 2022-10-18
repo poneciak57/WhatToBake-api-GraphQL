@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,4 +18,7 @@ public class Recipe {
     private Long id;
     private String title;
     private String link;
+
+    @Transient
+    private List<Product> products;
 }
