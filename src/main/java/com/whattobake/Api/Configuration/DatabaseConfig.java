@@ -22,8 +22,8 @@ public class DatabaseConfig {
     public ConnectionFactory connectionFactory() {
         return MySqlConnectionFactory.from(MySqlConnectionConfiguration.builder()
                 .host("127.0.0.1")
-                .user(env.getProperty("spring.r2dbc.username"))
-                .password(env.getProperty("spring.r2dbc.password"))
+                .user(env.getProperty("spring.r2dbc.username","root"))
+                .password(env.getProperty("spring.r2dbc.password",""))
                 .database("whattobake")
                 .build()
         );
