@@ -1,12 +1,8 @@
 package com.whattobake.Api.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.whattobake.Api.DTO.Bind;
 import com.whattobake.Api.Model.Category;
 import com.whattobake.Api.Model.Product;
-import com.whattobake.Api.Model.Recipe;
-import com.whattobake.Api.Repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
@@ -18,7 +14,6 @@ import reactor.core.publisher.Flux;
 public class ProductService {
 
     private final DatabaseClient databaseClient;
-    private final ProductRepository productRepository;
 
     public Flux<Product> allProducts(){
         String query = "SELECT p.id, p.name,c.id AS c_id,c.name AS c_name FROM whattobake.product AS p , whattobake.category AS c WHERE c.id = p.category" ;

@@ -1,6 +1,5 @@
 package com.whattobake.Api.Security;
 
-import com.whattobake.Api.Exception.WrongCredentials;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -1,18 +1,13 @@
 package com.whattobake.Api.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whattobake.Api.DTO.Bind;
 import com.whattobake.Api.DTO.Filters;
-import com.whattobake.Api.DTO.ProductsFromDb;
-import com.whattobake.Api.DTO.RecipeFull;
 import com.whattobake.Api.Enum.OrderDirection;
 import com.whattobake.Api.Enum.ProductOrder;
 import com.whattobake.Api.Model.Product;
 import com.whattobake.Api.Model.Recipe;
-import com.whattobake.Api.Repository.ProductRepository;
-import com.whattobake.Api.Repository.RecipeRepository;
 
 import io.r2dbc.spi.ConnectionFactory;
 
@@ -37,9 +32,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class RecipeService {
-
-    private final RecipeRepository recipeRepository;
-    private final ProductRepository productRepository;
     private final DatabaseClient databaseClient;
     private final ConnectionFactory connectionFactory;
 
@@ -110,23 +102,5 @@ public class RecipeService {
                                 .id(row.get("id",Long.class))
                                 .build()))
                 .subscribe(e->log.info(e.toString()));
-    }
-
-
-    @Deprecated
-    public Mono<Recipe> addRecipe(RecipeFull recipe){
-        return recipeRepository.save(Recipe.builder()
-                        .link(recipe.getLink())
-                        .title(recipe.getTitle())
-                .build()).doOnNext(r ->
-                    recipe.getProducts().forEach(product -> productRepository.findByName(product)
-                        .switchIfEmpty(productRepository.save(Product.builder().name(product).build()))
-                        .subscribe(p->
-                                databaseClient.inConnectionMany(connection -> Flux.from(
-                                        connection.createStatement("INSERT INTO `whattobake`.`recipe_product` (`recipe_id`,`product_id`) VALUES (?rid,?pid)")
-                                        .bind("rid",r.getId()).bind("pid",p.getId()).add()
-                                        .execute())).subscribe()
-                        ))
-        );
     }
 }
