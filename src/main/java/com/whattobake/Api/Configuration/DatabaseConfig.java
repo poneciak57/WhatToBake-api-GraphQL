@@ -4,6 +4,7 @@ import dev.miku.r2dbc.mysql.MySqlConnectionConfiguration;
 import dev.miku.r2dbc.mysql.MySqlConnectionFactory;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,20 +15,17 @@ import org.springframework.r2dbc.core.DatabaseClient;
 
 @Configuration
 @EnableR2dbcRepositories
+@RequiredArgsConstructor
 public class DatabaseConfig {
 
-    @Value( "${spring.r2dbc.username:root}" )
-    private String username;
-
-    @Value( "${spring.r2dbc.password:}" )
-    private String password;
+    private final Environment env;
 
     @Bean
     public ConnectionFactory connectionFactory() {
         return MySqlConnectionFactory.from(MySqlConnectionConfiguration.builder()
                 .host("127.0.0.1")
-                .user(username)
-                .password(password)
+                .user(env.getProperty("spring.r2dbc.username","root"))
+                .password(env.getProperty("spring.r2dbc.password"))
                 .database("whattobake")
                 .build()
         );

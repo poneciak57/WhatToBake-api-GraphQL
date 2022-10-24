@@ -12,12 +12,19 @@ CREATE TABLE `whattobake`.`user`(
 CREATE TABLE `whattobake`.`recipe`(
     `id` INT AUTO_INCREMENT NOT NULL ,
     `title` VARCHAR(255),
+    `image` VARCHAR(255),
     `link` VARCHAR(255),
+    PRIMARY KEY (`id`)
+);
+CREATE TABLE `whattobake`.`category`(
+    `id` INT AUTO_INCREMENT NOT NULL ,
+    `name` VARCHAR(255) UNIQUE ,
     PRIMARY KEY (`id`)
 );
 CREATE TABLE `whattobake`.`product`(
     `id` INT AUTO_INCREMENT NOT NULL ,
     `name` VARCHAR(255) UNIQUE ,
+    `category` INT,
     PRIMARY KEY (`id`)
 );
 CREATE TABLE `whattobake`.`recipe_product`(

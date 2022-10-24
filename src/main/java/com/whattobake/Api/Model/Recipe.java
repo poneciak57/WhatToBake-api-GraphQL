@@ -18,6 +18,7 @@ public class Recipe {
     private Long id;
     private String title;
     private String link;
+    private String image;
 
     @Transient
     private List<Product> products;

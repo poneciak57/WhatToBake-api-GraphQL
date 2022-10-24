@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -46,24 +47,28 @@ public class RecipeService {
     private int pageCount;
 
     @SneakyThrows
-    public Flux<Recipe> allRecipes(Filters filters){
-        String query = "" +
-                "SELECT r.*, CONCAT('[', GROUP_CONCAT(CONCAT('{\"id\":',p.id,',\"name\":\"',p.name,'\"}') SEPARATOR ','),']') AS products FROM whattobake.recipe r JOIN whattobake.product p ON (SELECT COUNT(1) FROM whattobake.recipe_product rp WHERE p.id = rp.product_id AND rp.recipe_id = r.id) ";
+    public Flux<Recipe> allRecipes(Optional<Filters> filters_opt){
+        String query = "SELECT r.*, CONCAT('[', GROUP_CONCAT(CONCAT('{\"id\":',p.id,',\"name\":\"',p.name,'\",\"category\":{\"id\":',p.category,',\"name\":\"',c.name,'\"}}') SEPARATOR ','),']') AS products FROM whattobake.recipe r JOIN whattobake.product p ON (SELECT COUNT(1) FROM whattobake.recipe_product rp WHERE p.id = rp.product_id AND rp.recipe_id = r.id) JOIN whattobake.category c ON c.id = p.category ";
         List<Bind> args = new ArrayList<>();
         String order = "";
-
+        int page = 0;
         //preparing query
-        if(filters.getProducts() != null){
-            query += " LEFT JOIN(SELECT recipe_id AS 'recipe',COUNT(*) AS 'owned' FROM recipe_product WHERE product_id "+(filters.getProductOrder()== ProductOrder.LEAST?"NOT":"")+" IN(:products) GROUP BY recipe_id) X ON X.recipe = r.id ";
-            order += " ORDER BY IFNULL(owned,0) " + (filters.getOrderDirection() != null ? filters.getOrderDirection().getValue() : OrderDirection.ASC.getValue());
-            args.add(new Bind("products",filters.getProducts()));
+        if(filters_opt.isPresent()){
+            Filters filters = filters_opt.get();
+            if(filters.getProducts() != null){
+                query += " LEFT JOIN(SELECT recipe_id AS 'recipe',COUNT(*) AS 'owned' FROM recipe_product WHERE product_id "+(filters.getProductOrder()== ProductOrder.LEAST?"NOT":"")+" IN(:products) GROUP BY recipe_id) X ON X.recipe = r.id ";
+                order += " ORDER BY IFNULL(owned,0) " + (filters.getOrderDirection() != null ? filters.getOrderDirection().getValue() : OrderDirection.ASC.getValue());
+                args.add(new Bind("products",filters.getProducts()));
+            }
+            if (filters.getPage() != null) {
+                page = filters.getPage();
+            }
         }
+
         query += " GROUP BY r.id ";
         query += order;
-        if (filters.getPage() != null) {
-            query += " LIMIT "+pageCount+" OFFSET :page ";
-            args.add(new Bind("page",pageCount*filters.getPage()));
-        }
+        query += " LIMIT "+pageCount+" OFFSET :page ";
+        args.add(new Bind("page",pageCount*page));
 
         GenericExecuteSpec genericExecuteSpec = databaseClient.sql(query);
 
@@ -80,6 +85,7 @@ public class RecipeService {
                                 .id(row.get("id",Long.class))
                                 .title(row.get("title",String.class))
                                 .link(row.get("link",String.class))
+                                .image(row.get("image",String.class))
                                 .products(objectMapper.readValue(
                                         row.get("products",String.class),
                                         objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class)))
@@ -107,6 +113,7 @@ public class RecipeService {
     }
 
 
+    @Deprecated
     public Mono<Recipe> addRecipe(RecipeFull recipe){
         return recipeRepository.save(Recipe.builder()
                         .link(recipe.getLink())

@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootApplication
 @Slf4j
@@ -44,26 +45,30 @@ public class ApiApplication {
 					).flatMap(userRepository::save)
 					.thenMany(userRepository.findAll())
 					.subscribe(e->log.info(e.toString()));
-
-			Mono.from(connectionFactory.create())
-					.flatMapMany(connection -> connection.createStatement("DELETE FROM `whattobake`.`recipe_product`").execute()
-					).thenMany(
-							recipeRepository.deleteAll()
-									.thenMany(
-											Flux.just(
-													new RecipeFull("przepis1","link1",List.of("masło","mąka","jajka")),
-													new RecipeFull("przepis2","link2",List.of("jajka","drożdże")),
-													new RecipeFull("przepis3","link3",List.of("czekolada","mąka","jajka")),
-													new RecipeFull("przepis4","link4",List.of("mąka")),
-													new RecipeFull("przepis5","link5",List.of()),
-													new RecipeFull("przepis6","link6",List.of("mleko","jajka")),
-													new RecipeFull("przepis7","link7",List.of("mleko","drożdże","mąka")),
-													new RecipeFull("przepis8","link8",List.of("czekolada","mąka","jajka")),
-													new RecipeFull("przepis9","link9",List.of("mąka")),
-													new RecipeFull("przepis10","link10",List.of("mleko"))
-											)
-									).flatMap(recipeService::addRecipe)
-					).subscribe(e->log.info(e.toString()));
+//
+//			Mono.from(connectionFactory.create())
+//					.flatMapMany(connection -> connection.createStatement("DELETE FROM `whattobake`.`recipe_product`").execute()
+//					).thenMany(
+//							recipeRepository.deleteAll()
+//									.thenMany(
+//											Flux.just(
+//													new RecipeFull("przepis1","link1",List.of("masło","mąka","jajka")),
+//													new RecipeFull("przepis2","link2",List.of("jajka","drożdże")),
+//													new RecipeFull("przepis3","link3",List.of("czekolada","mąka","jajka")),
+//													new RecipeFull("przepis4","link4",List.of("mąka")),
+//													new RecipeFull("przepis5","link5",List.of()),
+//													new RecipeFull("przepis6","link6",List.of("mleko","jajka")),
+//													new RecipeFull("przepis7","link7",List.of("mleko","drożdże","mąka")),
+//													new RecipeFull("przepis8","link8",List.of("czekolada","mąka","jajka")),
+//													new RecipeFull("przepis9","link9",List.of("mąka")),
+//													new RecipeFull("przepis10","link10",List.of("mleko"))
+//											)
+//									).flatMap(recipeService::addRecipe)
+//					)
+////					Sprawdzic czemu nie loguje
+//					.thenMany(
+//							recipeService.allRecipes(Optional.empty())
+//					).subscribe(e->log.info(e.toString()));
 
 		};
 	}

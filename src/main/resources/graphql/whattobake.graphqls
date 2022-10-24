@@ -2,6 +2,7 @@
 type Recipe{
     id:ID
     title:String
+    image:String
     link:String
     products:[Product]
 }
@@ -10,6 +11,12 @@ type Recipe{
 type Product{
     id:ID
     name:String
+    category: Category
+}
+
+type Category {
+    id: ID
+    name: String
 }
 
 # Filters for recipes

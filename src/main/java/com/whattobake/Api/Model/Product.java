@@ -14,6 +14,8 @@ public class Product {
     @Id
     private Long id;
     private String name;
+    private Category category;
+
 
     public Product(String name) {
         this.name = name;
