@@ -23,23 +23,37 @@ type Category {
 # page - number of requested page, starts from 0
 # products - list of product IDs
 # productOrder -
-# orderDirection -
-input FilterInput{
+# orderDirection - Deprecated
+input RecipeFilterInput{
     page:Int
     products: [Int]
-    productOrder: productOrder
-    orderDirection: orderDirection
+    productOrder: [recipeProductOrder]
+#    orderDirection: orderDirection
+}
+
+# Filters for products
+# productOrder - list of order methods
+input ProductFilterInput {
+    productOrder: [productOrder]
 }
 
 # Product Order enum
 # MOST - you want to order by recipes with the most number of matching products
-# LEAST - you want to order by recipes with the least number of matching products
-enum productOrder{
+# LEAST - you want to order by recipes with the least number of NOT-matching products
+enum recipeProductOrder{
     MOST
     LEAST
 }
 
-enum orderDirection{
-    ASC
-    DESC
+# Product Order Type enum
+# ALPHABETIC_ASC - order products according to alphabet ascending
+# ALPHABETIC_DESC - order products according to alphabet descending
+enum productOrder{
+    ALPHABETIC_ASC,
+    ALPHABETIC_DESC
 }
+
+#enum orderDirection{
+#    ASC
+#    DESC
+#}

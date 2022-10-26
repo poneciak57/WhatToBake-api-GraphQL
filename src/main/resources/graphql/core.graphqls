@@ -1,6 +1,6 @@
 type Query{
-    allRecipes(filter:FilterInput):[Recipe]
-    allProducts:[Product]
+    allRecipes(filter:RecipeFilterInput):[Recipe]
+    allProducts(filter:ProductFilterInput):[Product]
 
 #    Test if you are authenticated as admin
     testAdmin: Message
@@ -8,6 +8,7 @@ type Query{
 #    Test if you are authenticated as user
     testUser:Message
 }
+
 type Mutation{
     login(authRequest:AuthRequest): AuthResponse
 }
