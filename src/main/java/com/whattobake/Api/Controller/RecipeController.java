@@ -1,6 +1,6 @@
 package com.whattobake.Api.Controller;
 
-import com.whattobake.Api.DTO.Filters;
+import com.whattobake.Api.DTO.RecipeFilters;
 import com.whattobake.Api.Model.Recipe;
 import com.whattobake.Api.Service.RecipeService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     @QueryMapping
-    public Flux<Recipe> allRecipes(@Argument("filter") Optional<Filters> filters){
+    public Flux<Recipe> allRecipes(@Argument("filter") Optional<RecipeFilters> filters){
         return recipeService.allRecipes(filters);
     }
 

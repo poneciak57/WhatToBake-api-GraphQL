@@ -3,9 +3,8 @@ package com.whattobake.Api.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whattobake.Api.DTO.Bind;
-import com.whattobake.Api.DTO.Filters;
-import com.whattobake.Api.Enum.OrderDirection;
-import com.whattobake.Api.Enum.ProductOrder;
+import com.whattobake.Api.DTO.RecipeFilters;
+import com.whattobake.Api.Enum.RecipeProductOrder;
 import com.whattobake.Api.Model.Product;
 import com.whattobake.Api.Model.Recipe;
 
@@ -26,6 +25,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -39,18 +39,56 @@ public class RecipeService {
     private int pageCount;
 
     @SneakyThrows
-    public Flux<Recipe> allRecipes(Optional<Filters> filters_opt){
-        String query = "SELECT r.*, CONCAT('[', GROUP_CONCAT(CONCAT('{\"id\":',p.id,',\"name\":\"',p.name,'\",\"category\":{\"id\":',p.category,',\"name\":\"',c.name,'\"}}') SEPARATOR ','),']') AS products FROM whattobake.recipe r JOIN whattobake.product p ON (SELECT COUNT(1) FROM whattobake.recipe_product rp WHERE p.id = rp.product_id AND rp.recipe_id = r.id) JOIN whattobake.category c ON c.id = p.category ";
+    public Flux<Recipe> allRecipes(Optional<RecipeFilters> filters_opt){
+        String query = """
+        SELECT
+            r.*,
+            CONCAT('[', GROUP_CONCAT(CONCAT('{"id":',p.id,',"name":"',p.name,'","category":{"id":',p.category,',"name":"',c.name,'"}}') SEPARATOR ','),']') AS products
+        FROM whattobake.recipe r
+        JOIN whattobake.product p ON (
+            SELECT COUNT(1)
+            FROM whattobake.recipe_product rp
+            WHERE
+                p.id = rp.product_id AND
+                rp.recipe_id = r.id
+        )
+        JOIN whattobake.category c ON c.id = p.category 
+        """;
         List<Bind> args = new ArrayList<>();
         String order = "";
         int page = 0;
         //preparing query
         if(filters_opt.isPresent()){
-            Filters filters = filters_opt.get();
+            RecipeFilters filters = filters_opt.get();
             if(filters.getProducts() != null){
-                query += " LEFT JOIN(SELECT recipe_id AS 'recipe',COUNT(*) AS 'owned' FROM recipe_product WHERE product_id "+(filters.getProductOrder()== ProductOrder.LEAST?"NOT":"")+" IN(:products) GROUP BY recipe_id) X ON X.recipe = r.id ";
-                order += " ORDER BY IFNULL(owned,0) " + (filters.getOrderDirection() != null ? filters.getOrderDirection().getValue() : OrderDirection.ASC.getValue());
-                args.add(new Bind("products",filters.getProducts()));
+                query += """
+                LEFT JOIN(
+                    SELECT
+                        recipe_id AS 'recipe',
+                        COUNT(*) AS 'notowned'
+                    FROM recipe_product
+                    WHERE product_id NOT IN(:products1)
+                    GROUP BY recipe_id
+                ) X ON X.recipe = r.id
+                LEFT JOIN(
+                    SELECT
+                        recipe_id AS 'recipe',
+                        COUNT(*) AS 'owned'
+                    FROM recipe_product
+                    WHERE product_id IN(:products2)
+                    GROUP BY recipe_id
+                ) Y ON Y.recipe = r.id 
+                """;
+                if(!filters.getProductOrder().isEmpty()){
+                    order += " ORDER BY " + filters
+                            .getProductOrder()
+                            .stream()
+                            .distinct()
+                            .map(RecipeProductOrder::getValue)
+                            .collect(Collectors.joining(","));
+                }
+                args.add(new Bind("products1",filters.getProducts()));
+                args.add(new Bind("products2",filters.getProducts()));
             }
             if (filters.getPage() != null) {
                 page = filters.getPage();

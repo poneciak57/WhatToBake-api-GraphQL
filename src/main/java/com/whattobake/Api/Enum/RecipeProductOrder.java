@@ -1,12 +1,11 @@
 package com.whattobake.Api.Enum;
 
-@Deprecated
-public enum OrderDirection {
-    ASC("ASC"),
-    DESC("DESC");
+public enum RecipeProductOrder {
+    MOST(" IFNULL(owned,0) DESC "),
+    LEAST(" IFNULL(notowned,0) ASC ");
 
     private final String value;
-    OrderDirection(final String value) {
+    RecipeProductOrder(final String value) {
         this.value = value;
     }
 
