@@ -18,21 +18,21 @@ type Mutation{
 
 
 #    Adds new category
-    newCategory(category:CategoryInput): Category
+    newCategory(category:CategoryInput!): Category
 #    Update existing category by id
-    updateCategory(id:ID,category:CategoryInput):Category
+    updateCategory(id:ID!,category:CategoryInput!):Boolean
 #    Delete category by id
-    deleteCategory(id:ID):Boolean
+    deleteCategory(id:ID!):Boolean
 
 #    Adds new product
-    newProduct(product:ProductInput):Product
+    newProduct(product:ProductInput!):Product
 #    Update existing product
-    updateProduct(id:ID,product:ProductInput):Product
+    updateProduct(id:ID!,product:ProductInput!):Boolean
 
 #    Adds new recipe
-    newRecipe(recipe:RecipeInput):Recipe
+    newRecipe(recipe:RecipeInput!):Recipe
 #    Update existing recipe
-    updateRecipe(id:ID,recipe:RecipeInput):Recipe
+    updateRecipe(id:ID!,recipe:RecipeInput!):Boolean
     #    deleteRecipe(id:ID):Boolean
     #    deleteProduct(id:ID):Boolean
 }
