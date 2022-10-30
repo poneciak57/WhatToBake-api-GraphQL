@@ -1,17 +1,18 @@
 type Message {
+#   Content of message
     content:String
 }
 
 # LoginResponse
-# token - is used to authenticate user need to be provided in AuthHeader
 type AuthResponse {
+#   JWT used to authenticate user (need to be provided via Authentication header)
     token:String
 }
 
 # Login Request
-# username - user login
-# password - user password
 input AuthRequest {
+#   User login
     username:String
+#   User password
     password:String
 }

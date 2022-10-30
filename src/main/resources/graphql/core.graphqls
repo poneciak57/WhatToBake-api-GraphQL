@@ -1,14 +1,18 @@
 type Query{
+#   Get all recipes
     allRecipes(filter:RecipeFilterInput):[Recipe]
+#   Get all products
     allProducts(filter:ProductFilterInput):[Product]
+
+
 
 #    Test if you are authenticated as admin
     testAdmin: Message
-
 #    Test if you are authenticated as user
     testUser:Message
 }
 
 type Mutation{
+#   Login
     login(authRequest:AuthRequest): AuthResponse
 }
