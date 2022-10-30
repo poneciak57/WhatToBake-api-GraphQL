@@ -28,7 +28,7 @@ public class CategoryController {
     }
 
     @MutationMapping
-    public Mono<Category> updateCategory(@Argument("id") Long id,@Argument("category") CategoryInput categoryInput){
+    public Mono<Boolean> updateCategory(@Argument("id") Long id,@Argument("category") CategoryInput categoryInput){
         return categoryService.update(new Category(id,categoryInput.getName()));
     }
 
