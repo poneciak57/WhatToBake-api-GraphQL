@@ -1,10 +1,10 @@
 type Query{
-#   Get all recipes
+#    Get all recipes
     allRecipes(filter:RecipeFilterInput):[Recipe]
-#   Get all products
+#    Get all products
     allProducts(filter:ProductFilterInput):[Product]
-
-
+#    Get all categories
+    allCategories:[Category]
 
 #    Test if you are authenticated as admin
     testAdmin: Message
@@ -13,6 +13,26 @@ type Query{
 }
 
 type Mutation{
-#   Login
+#    Login
     login(authRequest:AuthRequest): AuthResponse
+
+
+#    Adds new category
+    newCategory(category:CategoryInput): Category
+#    Update existing category by id
+    updateCategory(id:ID,category:CategoryInput):Category
+#    Delete category by id
+    deleteCategory(id:ID):Boolean
+
+#    Adds new product
+    newProduct(product:ProductInput):Product
+#    Update existing product
+    updateProduct(id:ID,product:ProductInput):Product
+
+#    Adds new recipe
+    newRecipe(recipe:RecipeInput):Recipe
+#    Update existing recipe
+    updateRecipe(id:ID,recipe:RecipeInput):Recipe
+    #    deleteRecipe(id:ID):Boolean
+    #    deleteProduct(id:ID):Boolean
 }

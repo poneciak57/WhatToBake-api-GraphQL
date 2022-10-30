@@ -6,6 +6,12 @@ type Recipe{
     link:String
     products:[Product]
 }
+input RecipeInput{
+    title:String
+    image:String
+    link:String
+    products:[ID]
+}
 
 # Product object
 type Product{
@@ -13,19 +19,27 @@ type Product{
     name:String
     category: Category
 }
+input ProductInput{
+    name:String
+    category: ID
+}
 
 type Category {
     id: ID
     name: String
 }
 
+input CategoryInput{
+    name: String
+}
+
 # Filters for recipes
 input RecipeFilterInput{
-#   Number of requested page, starts from 0
+#    Number of requested page, starts from 0
     page:Int
-#   List of product IDs that user have
+#    List of product IDs that user have
     products: [Int]
-#   List of order methods to apply on result
+#    List of order methods to apply on result
     productOrder: [recipeProductOrder]
 
 #    orderDirection: orderDirection
@@ -33,22 +47,22 @@ input RecipeFilterInput{
 
 # Filters for products
 input ProductFilterInput {
-#   List of order methods
+#    List of order methods
     productOrder: [productOrder]
 }
 
 # Product Order enum
 enum recipeProductOrder{
-#   If you want to order by recipes with the most number of matching products
+#    If you want to order by recipes with the most number of matching products
     MOST
-#   If you want to order by recipes with the least number of NOT-matching products
+#    If you want to order by recipes with the least number of NOT-matching products
     LEAST
 }
 
 # Product Order Type enum
 enum productOrder{
-#   Order products according to alphabet ascending
+#    Order products according to alphabet ascending
     ALPHABETIC_ASC
-#   Order products according to alphabet descending
+#    Order products according to alphabet descending
     ALPHABETIC_DESC
 }
