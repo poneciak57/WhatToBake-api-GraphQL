@@ -4,7 +4,18 @@ TRUNCATE TABLE whattobake.recipe;
 TRUNCATE TABLE whattobake.product;
 
 INSERT INTO whattobake.category (name) VALUES
-('brak'); # 1
+('brak'),
+('Zboża i Produkty sypkie'),
+('Nabiał i Jaja'),
+('Owoce i Przetwory'),
+('Warzywa i Przetwory'),
+('Cukier/Słodycze/Posypki'),
+('Oleje i Tłuszcze'),
+('Kremy, Pasty i Ciasta'),
+('Syropy i Napoje'),
+('Orzechy i Nasiona'),
+('Ekstrakty i Przyprawy'),
+('Inne');
 
 INSERT INTO whattobake.product (name, category) VALUES ('proszek do pieczenia','1'),('ekstrakt z wanilii','10'),
 ('przyprawa do piernika','10'),('dżem z moreli','3'),('syrop z agawy','8'),('oliwa z oliwek','6'),('suszone płatki róży','11'),
