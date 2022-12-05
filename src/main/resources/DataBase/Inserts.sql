@@ -4,7 +4,6 @@ TRUNCATE TABLE whattobake.recipe;
 TRUNCATE TABLE whattobake.product;
 
 INSERT INTO whattobake.category (name) VALUES
-('brak'),
 ('Zboża i Produkty sypkie'),
 ('Nabiał i Jaja'),
 ('Owoce i Przetwory'),
