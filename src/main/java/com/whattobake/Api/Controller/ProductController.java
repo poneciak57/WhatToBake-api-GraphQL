@@ -23,6 +23,10 @@ public class ProductController {
     public Flux<Product> allProducts(@Argument("filter") Optional<ProductFilters> productFilters){
         return productService.allProducts(productFilters);
     }
+    @QueryMapping
+    public Flux<Product> productsByCategory(@Argument("categoryId") Long id){
+        return productService.productsByCategory(id);
+    }
 
     @MutationMapping
     public Mono<Product> newProduct(@Argument("product") ProductInput product){

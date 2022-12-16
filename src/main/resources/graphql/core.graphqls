@@ -5,6 +5,8 @@ type Query{
     allProducts(filter:ProductFilterInput):[Product]
 #    Get all categories
     allCategories:[Category]
+#    Get all products by category
+    productsByCategory(categoryId: ID!): [Product]
 
 #    Test if you are authenticated as admin
     testAdmin: Message

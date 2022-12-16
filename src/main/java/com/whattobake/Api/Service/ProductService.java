@@ -96,4 +96,27 @@ public class ProductService {
                         .build()
         ).all();
     }
+
+    public Flux<Product> productsByCategory(Long categoryId) {
+        String query = """
+            SELECT
+                p.id,
+                p.name,
+                c.id AS c_id,
+                c.name AS c_name
+            FROM
+                whattobake.product AS p,
+                whattobake.category AS c
+            WHERE c.id = p.category AND p.category = :categoryId;
+        """;
+        return databaseClient.sql(query)
+                .bind("categoryId",categoryId)
+                .map((row,rowMeta) ->
+                        Product.builder()
+                                .id(row.get("id",Long.class))
+                                .name(row.get("name",String.class))
+                                .category(new Category(row.get("c_id",Long.class),row.get("c_name",String.class)))
+                                .build()
+                ).all();
+    }
 }
